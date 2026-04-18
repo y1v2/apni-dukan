@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
-const STATUS_COLORS = { Placed: '#378ADD', Packed: '#BA7517', 'Out for Delivery': '#f07c2a', Delivered: '#1a6b3a' };
+const STEPS = ['Placed','Packed','Out for Delivery','Delivered'];
+const COLORS = { Placed:'#378ADD', Packed:'#BA7517', 'Out for Delivery':'#f07c2a', Delivered:'#145530' };
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
@@ -9,54 +11,64 @@ export default function Orders() {
 
   useEffect(() => {
     if (!token) return;
-    axios.get('http://localhost:5000/api/orders/my', { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => setOrders(r.data)).catch(() => {});
+    axios.get('http://localhost:5000/api/orders/my', { headers:{ Authorization:`Bearer ${token}` } })
+      .then(r => setOrders(r.data)).catch(()=>{});
   }, [token]);
 
   if (!token) return (
-    <div style={{ textAlign: 'center', padding: '80px 20px' }}>
-      <div style={{ fontSize: 60 }}>📦</div>
-      <h2 style={{ fontFamily: 'Syne,sans-serif', fontSize: 24, marginTop: 16 }}>Please login to view orders</h2>
+    <div style={{ minHeight:'80vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', background:'#f5f9f6' }}>
+      <div style={{ fontSize:80, marginBottom:20 }}>📦</div>
+      <h2 style={{ fontFamily:"'Baloo 2',cursive", fontSize:28, fontWeight:800, color:'#0a2e1a', marginBottom:16 }}>Please login to view orders</h2>
+      <Link to="/login" style={{ background:'#145530', color:'#fff', borderRadius:50, padding:'14px 36px', fontWeight:700, textDecoration:'none', fontSize:15 }}>Login Now →</Link>
     </div>
   );
 
   return (
-    <div style={{ maxWidth: 700, margin: '0 auto', padding: '40px 20px' }}>
-      <h1 style={{ fontFamily: 'Syne,sans-serif', fontSize: 28, fontWeight: 800, marginBottom: 24 }}>My Orders</h1>
-      {orders.length === 0 ? <p style={{ color: '#6b8f71' }}>No orders yet. Start shopping!</p> : orders.map(order => (
-        <div key={order._id} style={{ background: '#fff', borderRadius: 16, border: '1px solid #eaf2ec', padding: '20px', marginBottom: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-            <span style={{ fontSize: 13, color: '#6b8f71' }}>Order #{order._id.slice(-6).toUpperCase()}</span>
-            <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 12px', borderRadius: 50, background: STATUS_COLORS[order.status] + '20', color: STATUS_COLORS[order.status] }}>{order.status}</span>
+    <div style={{ background:'#f5f9f6', minHeight:'80vh', padding:'36px' }}>
+      <h1 style={{ fontFamily:"'Baloo 2',cursive", fontSize:32, fontWeight:800, color:'#0a2e1a', marginBottom:28 }}>📦 My Orders</h1>
+      {orders.length === 0 ? (
+        <div style={{ textAlign:'center', padding:'60px 0' }}>
+          <div style={{ fontSize:64, marginBottom:16 }}>🛒</div>
+          <p style={{ color:'#6b8f71', fontSize:16, marginBottom:24 }}>No orders yet. Start shopping!</p>
+          <Link to="/" style={{ background:'#145530', color:'#fff', borderRadius:50, padding:'14px 36px', fontWeight:700, textDecoration:'none' }}>Shop Now →</Link>
+        </div>
+      ) : orders.map(order => (
+        <div key={order._id} style={{ background:'#fff', borderRadius:24, border:'1.5px solid #e8f2ea', padding:'24px 28px', marginBottom:20, boxShadow:'0 4px 16px rgba(20,85,48,0.06)' }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
+            <div>
+              <div style={{ fontFamily:"'Baloo 2',cursive", fontSize:18, fontWeight:800, color:'#0a2e1a' }}>Order #{order._id.slice(-6).toUpperCase()}</div>
+              <div style={{ fontSize:12, color:'#6b8f71', marginTop:3 }}>{new Date(order.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</div>
+            </div>
+            <span style={{ fontSize:13, fontWeight:700, padding:'6px 18px', borderRadius:50, background:COLORS[order.status]+'20', color:COLORS[order.status], border:`1.5px solid ${COLORS[order.status]}40` }}>{order.status}</span>
           </div>
-          {/* Live tracking bar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 16 }}>
-            {['Placed','Packed','Out for Delivery','Delivered'].map((s, i, arr) => {
-              const steps = ['Placed','Packed','Out for Delivery','Delivered'];
-              const currentIdx = steps.indexOf(order.status);
+          {/* Tracking */}
+          <div style={{ display:'flex', alignItems:'center', gap:0, marginBottom:24 }}>
+            {STEPS.map((s,i) => {
+              const currentIdx = STEPS.indexOf(order.status);
               const active = i <= currentIdx;
               return (
                 <React.Fragment key={s}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                    <div style={{ width: 24, height: 24, borderRadius: '50%', background: active ? '#1a6b3a' : '#e8f5ee', border: `2px solid ${active ? '#1a6b3a' : '#c5e0cb'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: active ? '#fff' : '#6b8f71' }}>✓</div>
-                    <span style={{ fontSize: 9, color: active ? '#1a6b3a' : '#6b8f71', fontWeight: active ? 600 : 400, textAlign: 'center', maxWidth: 55 }}>{s}</span>
+                  <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
+                    <div style={{ width:32, height:32, borderRadius:'50%', background:active?'#145530':'#e8f2ea', border:`2px solid ${active?'#145530':'#c8e0d0'}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, color:active?'#fff':'#6b8f71', fontWeight:700, transition:'all 0.3s' }}>{active?'✓':i+1}</div>
+                    <span style={{ fontSize:10, color:active?'#145530':'#6b8f71', fontWeight:active?700:500, textAlign:'center', maxWidth:70 }}>{s}</span>
                   </div>
-                  {i < arr.length - 1 && <div style={{ flex: 1, height: 2, background: i < currentIdx ? '#1a6b3a' : '#e0ede3', marginBottom: 16 }} />}
+                  {i < STEPS.length-1 && <div style={{ flex:1, height:3, background:i<currentIdx?'#145530':'#e8f2ea', margin:'0 4px 20px', borderRadius:4, transition:'background 0.3s' }} />}
                 </React.Fragment>
               );
             })}
           </div>
-          {order.items.map((item, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0', borderTop: '0.5px solid #eaf2ec' }}>
-              <span>{item.name} x{item.qty}</span>
-              <span style={{ color: '#1a6b3a', fontWeight: 600 }}>₹{item.price * item.qty}</span>
+          {order.items.map((item,i) => (
+            <div key={i} style={{ display:'flex', justifyContent:'space-between', fontSize:14, padding:'8px 0', borderTop:'1px solid #f0f7f2', color:'#4a6b50' }}>
+              <span style={{ fontWeight:500 }}>{item.name} <span style={{ color:'#6b8f71' }}>x{item.qty}</span></span>
+              <span style={{ fontWeight:700, color:'#145530' }}>₹{item.price*item.qty}</span>
             </div>
           ))}
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12, fontWeight: 700, fontSize: 15 }}>
-            <span>Total</span><span style={{ color: '#1a6b3a' }}>₹{order.total}</span>
+          <div style={{ display:'flex', justifyContent:'space-between', marginTop:14, padding:'14px 0', borderTop:'2px solid #e8f2ea', fontFamily:"'Baloo 2',cursive", fontSize:20, fontWeight:800, color:'#0a2e1a' }}>
+            <span>Total</span><span style={{ color:'#145530' }}>₹{order.total}</span>
           </div>
         </div>
       ))}
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Poppins:wght@400;500;600;700&display=swap');`}</style>
     </div>
   );
 }
