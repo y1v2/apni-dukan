@@ -17,12 +17,13 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import Refund from './pages/Refund';
 import Profile from './pages/Profile';
+import Admin from './pages/Admin';
 
 function App() {
   return (
     <CartProvider>
       <Router>
-        <Toaster position="top-center" />
+        <Toaster position="top-center" toastOptions={{ style: { fontFamily: "'Poppins',sans-serif", fontWeight: 600, borderRadius: 50 } }} />
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
@@ -38,6 +39,7 @@ function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/refund" element={<Refund />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
         <Footer />
       </Router>
