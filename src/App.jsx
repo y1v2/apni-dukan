@@ -18,30 +18,38 @@ import Privacy from './pages/Privacy';
 import Refund from './pages/Refund';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
+import AdminLogin from './pages/AdminLogin';
 
 function App() {
   return (
     <CartProvider>
       <Router>
-        <Toaster position="top-center" toastOptions={{ style: { fontFamily: "'Poppins',sans-serif", fontWeight: 600, borderRadius: 50 } }} />
-        <Navbar />
+        <Toaster position="top-center" toastOptions={{ style: { fontFamily: 'Poppins, sans-serif', fontWeight: 600, borderRadius: 50 } }} />
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/delivery-info" element={<DeliveryInfo />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/refund" element={<Refund />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="*" element={
+            <div>
+              <Navbar />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/orders" element={<Orders />} />
+                <Route path="/support" element={<Support />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/delivery-info" element={<DeliveryInfo />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/refund" element={<Refund />} />
+                <Route path="/profile" element={<Profile />} />
+              </Routes>
+              <Footer />
+            </div>
+          } />
         </Routes>
-        <Footer />
       </Router>
     </CartProvider>
   );

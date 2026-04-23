@@ -1,10 +1,21 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState(() => {
+    try {
+      const saved = localStorage.getItem('apnidukan_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) { return []; }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('apnidukan_cart', JSON.stringify(cartItems));
+    } catch (e) {}
+  }, [cartItems]);
 
   const addToCart = (product) => {
     setCartItems(prev => {
@@ -21,7 +32,10 @@ export const CartProvider = ({ children }) => {
     setCartItems(prev => prev.map(i => i._id === id ? { ...i, qty } : i));
   };
 
-  const clearCart = () => setCartItems([]);
+  const clearCart = () => {
+    setCartItems([]);
+    localStorage.removeItem('apnidukan_cart');
+  };
 
   const total = cartItems.reduce((sum, i) => sum + i.price * i.qty, 0);
   const mrpTotal = cartItems.reduce((sum, i) => sum + (i.mrp || i.price) * i.qty, 0);
