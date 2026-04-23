@@ -1,217 +1,127 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useProducts } from '../context/ProductContext';
 import toast from 'react-hot-toast';
 
-const ALL_PRODUCTS = [
-  {_id:'1',name:'Fresh Tomato',nameHindi:'ताज़ा टमाटर',quantity:'1 kg',price:35,mrp:45,category:'vegetables',badge:'Fresh',img:'https://images.unsplash.com/photo-1561136594-7f68413baa99?w=300&h=200&fit=crop'},
-  {_id:'2',name:'Green Spinach',nameHindi:'हरी पालक',quantity:'250 g',price:20,mrp:28,category:'vegetables',badge:'Organic',img:'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=300&h=200&fit=crop'},
-  {_id:'3',name:'Fresh Onion',nameHindi:'ताज़ा प्याज',quantity:'1 kg',price:28,mrp:35,category:'vegetables',badge:'Fresh',img:'https://images.unsplash.com/photo-1508747703725-719777637510?w=300&h=200&fit=crop'},
-  {_id:'4',name:'Potato',nameHindi:'आलू',quantity:'1 kg',price:25,mrp:32,category:'vegetables',badge:'Fresh',img:'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=300&h=200&fit=crop'},
-  {_id:'5',name:'Green Chilli',nameHindi:'हरी मिर्च',quantity:'100 g',price:15,mrp:22,category:'vegetables',badge:'Hot',img:'https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?w=300&h=200&fit=crop'},
-  {_id:'6',name:'Cauliflower',nameHindi:'गोभी',quantity:'1 piece',price:30,mrp:40,category:'vegetables',badge:'Fresh',img:'https://images.unsplash.com/photo-1568584711271-6c929fb49b60?w=300&h=200&fit=crop'},
-  {_id:'7',name:'Carrot',nameHindi:'गाजर',quantity:'500 g',price:22,mrp:30,category:'vegetables',badge:'Fresh',img:'https://images.unsplash.com/photo-1445282768818-728615cc910a?w=300&h=200&fit=crop'},
-  {_id:'8',name:'Cucumber',nameHindi:'खीरा',quantity:'500 g',price:18,mrp:25,category:'vegetables',badge:'Cool',img:'https://images.unsplash.com/photo-1449300079323-02e209d9d3a6?w=300&h=200&fit=crop'},
-  {_id:'9',name:'Fresh Banana',nameHindi:'केला',quantity:'12 pcs',price:48,mrp:60,category:'fruits',badge:'Ripe',img:'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=300&h=200&fit=crop'},
-  {_id:'10',name:'Red Apple',nameHindi:'सेब',quantity:'4 pcs',price:80,mrp:100,category:'fruits',badge:'Fresh',img:'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=300&h=200&fit=crop'},
-  {_id:'11',name:'Sweet Orange',nameHindi:'संतरा',quantity:'4 pcs',price:60,mrp:75,category:'fruits',badge:'Juicy',img:'https://images.unsplash.com/photo-1547514701-42782101795e?w=300&h=200&fit=crop'},
-  {_id:'12',name:'Watermelon',nameHindi:'तरबूज',quantity:'1 piece',price:65,mrp:80,category:'fruits',badge:'Fresh',img:'https://images.unsplash.com/photo-1563114773-84221bd62daa?w=300&h=200&fit=crop'},
-  {_id:'13',name:'Mango',nameHindi:'आम',quantity:'1 kg',price:90,mrp:120,category:'fruits',badge:'Season',img:'https://images.unsplash.com/photo-1553279768-865429fa0078?w=300&h=200&fit=crop'},
-  {_id:'14',name:'Papaya',nameHindi:'पपीता',quantity:'1 piece',price:55,mrp:70,category:'fruits',badge:'Fresh',img:'https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=300&h=200&fit=crop'},
-  {_id:'15',name:'Full Cream Milk',nameHindi:'दूध',quantity:'500 ml',price:29,mrp:32,category:'dairy',badge:'Daily',img:'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=300&h=200&fit=crop'},
-  {_id:'16',name:'Fresh Curd',nameHindi:'दही',quantity:'400 g',price:35,mrp:45,category:'dairy',badge:'Fresh',img:'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=300&h=200&fit=crop'},
-  {_id:'17',name:'Paneer',nameHindi:'पनीर',quantity:'200 g',price:75,mrp:95,category:'dairy',badge:'Fresh',img:'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=300&h=200&fit=crop'},
-  {_id:'18',name:'Butter',nameHindi:'मक्खन',quantity:'100 g',price:55,mrp:70,category:'dairy',badge:'Pure',img:'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=300&h=200&fit=crop'},
-  {_id:'19',name:'Farm Eggs',nameHindi:'अंडे',quantity:'6 pcs',price:36,mrp:48,category:'dairy',badge:'Farm',img:'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=300&h=200&fit=crop'},
-  {_id:'20',name:'Basmati Rice',nameHindi:'बासमती चावल',quantity:'1 kg',price:85,mrp:110,category:'grains',badge:'Premium',img:'https://images.unsplash.com/photo-1536304993881-ff86e0c9e90b?w=300&h=200&fit=crop'},
-  {_id:'21',name:'Toor Dal',nameHindi:'तूर दाल',quantity:'500 g',price:60,mrp:75,category:'grains',badge:'Fresh',img:'https://images.unsplash.com/photo-1585996741680-d1a9a3e1c8d5?w=300&h=200&fit=crop'},
-  {_id:'22',name:'Chana Dal',nameHindi:'चना दाल',quantity:'500 g',price:55,mrp:70,category:'grains',badge:'Pure',img:'https://images.unsplash.com/photo-1609501676725-7186f017a4b4?w=300&h=200&fit=crop'},
-  {_id:'23',name:'Wheat Atta',nameHindi:'गेहूं का आटा',quantity:'5 kg',price:220,mrp:260,category:'grains',badge:'Best',img:'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=300&h=200&fit=crop'},
-  {_id:'24',name:'Moong Dal',nameHindi:'मूंग दाल',quantity:'500 g',price:65,mrp:80,category:'grains',badge:'Fresh',img:'https://images.unsplash.com/photo-1585996741680-d1a9a3e1c8d5?w=300&h=200&fit=crop'},
-  {_id:'25',name:'Sugar',nameHindi:'चीनी',quantity:'1 kg',price:45,mrp:55,category:'grains',badge:'Pure',img:'https://images.unsplash.com/photo-1559181567-c3190ca9be46?w=300&h=200&fit=crop'},
-  {_id:'26',name:'Poha',nameHindi:'पोहा',quantity:'500 g',price:30,mrp:40,category:'grains',badge:'Light',img:'https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=300&h=200&fit=crop'},
-  {_id:'27',name:'Sunflower Oil',nameHindi:'सूरजमुखी तेल',quantity:'1 litre',price:145,mrp:175,category:'oil',badge:'Pure',img:'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300&h=200&fit=crop'},
-  {_id:'28',name:'Mustard Oil',nameHindi:'सरसों का तेल',quantity:'1 litre',price:160,mrp:190,category:'oil',badge:'Kachi Ghani',img:'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300&h=200&fit=crop'},
-  {_id:'29',name:'Turmeric Powder',nameHindi:'हल्दी',quantity:'100 g',price:28,mrp:40,category:'oil',badge:'Pure',img:'https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=300&h=200&fit=crop'},
-  {_id:'30',name:'Red Chilli Powder',nameHindi:'लाल मिर्च',quantity:'100 g',price:32,mrp:45,category:'oil',badge:'Spicy',img:'https://images.unsplash.com/photo-1601648764658-cf37e8c89b70?w=300&h=200&fit=crop'},
-  {_id:'31',name:'Garam Masala',nameHindi:'गरम मसाला',quantity:'50 g',price:35,mrp:50,category:'oil',badge:'Blend',img:'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=300&h=200&fit=crop'},
-  {_id:'32',name:'Salt',nameHindi:'नमक',quantity:'1 kg',price:22,mrp:28,category:'oil',badge:'Iodised',img:'https://images.unsplash.com/photo-1518110925495-5fe2fda0442c?w=300&h=200&fit=crop'},
-  {_id:'33',name:'Coriander Powder',nameHindi:'धनिया पाउडर',quantity:'100 g',price:22,mrp:32,category:'oil',badge:'Fresh',img:'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=300&h=200&fit=crop'},
-  {_id:'34',name:'Parle-G Biscuits',nameHindi:'बिस्किट',quantity:'800 g',price:50,mrp:60,category:'snacks',badge:'Popular',img:'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=300&h=200&fit=crop'},
-  {_id:'35',name:'Namkeen Mix',nameHindi:'नमकीन',quantity:'200 g',price:30,mrp:40,category:'snacks',badge:'Crispy',img:'https://images.unsplash.com/photo-1575367439058-6096bb43d5d3?w=300&h=200&fit=crop'},
-  {_id:'36',name:'Potato Chips',nameHindi:'चिप्स',quantity:'100 g',price:20,mrp:30,category:'snacks',badge:'Crunchy',img:'https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=300&h=200&fit=crop'},
-  {_id:'37',name:'Maggi Noodles',nameHindi:'मैगी',quantity:'4 pack',price:56,mrp:68,category:'snacks',badge:'Quick',img:'https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=300&h=200&fit=crop'},
-  {_id:'38',name:'Brown Bread',nameHindi:'ब्रेड',quantity:'400 g',price:42,mrp:55,category:'snacks',badge:'Fresh',img:'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&h=200&fit=crop'},
-  {_id:'39',name:'Roasted Peanuts',nameHindi:'मूंगफली',quantity:'200 g',price:25,mrp:35,category:'snacks',badge:'Protein',img:'https://images.unsplash.com/photo-1567892737950-30b3c38ae5e0?w=300&h=200&fit=crop'},
-  {_id:'40',name:'Coca Cola',nameHindi:'कोका कोला',quantity:'750 ml',price:40,mrp:50,category:'drinks',badge:'Cold',img:'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=300&h=200&fit=crop'},
-  {_id:'41',name:'Sprite',nameHindi:'स्प्राइट',quantity:'750 ml',price:40,mrp:50,category:'drinks',badge:'Fresh',img:'https://images.unsplash.com/photo-1527960471264-932f39eb5846?w=300&h=200&fit=crop'},
-  {_id:'42',name:'Mango Juice',nameHindi:'आम का जूस',quantity:'200 ml',price:20,mrp:28,category:'drinks',badge:'Fruity',img:'https://images.unsplash.com/photo-1546171753-97d7676e4602?w=300&h=200&fit=crop'},
-  {_id:'43',name:'Mineral Water',nameHindi:'पानी',quantity:'1 litre',price:20,mrp:25,category:'drinks',badge:'Pure',img:'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=300&h=200&fit=crop'},
-  {_id:'44',name:'Lassi',nameHindi:'लस्सी',quantity:'200 ml',price:25,mrp:35,category:'drinks',badge:'Fresh',img:'https://images.unsplash.com/photo-1528825871115-3581a5387919?w=300&h=200&fit=crop'},
-  {_id:'45',name:'Dettol Soap',nameHindi:'साबुन',quantity:'75 g',price:38,mrp:50,category:'household',badge:'Protect',img:'https://images.unsplash.com/photo-1584305574647-0cc949a2bb9f?w=300&h=200&fit=crop'},
-  {_id:'46',name:'Surf Excel',nameHindi:'सर्फ एक्सेल',quantity:'500 g',price:85,mrp:105,category:'household',badge:'Clean',img:'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=300&h=200&fit=crop'},
-  {_id:'47',name:'Colgate Toothpaste',nameHindi:'टूथपेस्ट',quantity:'150 g',price:65,mrp:85,category:'household',badge:'Care',img:'https://images.unsplash.com/photo-1559591939-0e0e3e8b8a2d?w=300&h=200&fit=crop'},
-  {_id:'48',name:'Dish Wash Bar',nameHindi:'बर्तन साबुन',quantity:'200 g',price:20,mrp:28,category:'household',badge:'Clean',img:'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=300&h=200&fit=crop'},
-  {_id:'49',name:'Agarbatti',nameHindi:'अगरबत्ती',quantity:'20 sticks',price:15,mrp:22,category:'household',badge:'Fragrant',img:'https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=300&h=200&fit=crop'},
-  {_id:'50',name:'Match Box',nameHindi:'माचिस',quantity:'1 box',price:5,mrp:8,category:'household',badge:'Daily',img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=200&fit=crop'},
-];
-
 const CATS = [
-  {id:'All',label:'All Items'},
-  {id:'vegetables',label:'Vegetables'},
-  {id:'fruits',label:'Fruits'},
-  {id:'dairy',label:'Dairy'},
-  {id:'grains',label:'Grains & Dal'},
-  {id:'oil',label:'Oil & Masala'},
-  {id:'snacks',label:'Snacks'},
-  {id:'drinks',label:'Drinks'},
-  {id:'household',label:'Household'},
+  {id:'All',label:'All Items'},{id:'vegetables',label:'Vegetables'},{id:'fruits',label:'Fruits'},
+  {id:'dairy',label:'Dairy'},{id:'grains',label:'Grains & Dal'},{id:'oil',label:'Oil & Masala'},
+  {id:'snacks',label:'Snacks'},{id:'drinks',label:'Drinks'},{id:'household',label:'Household'},
 ];
 
 export default function Products() {
   const location = useLocation();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { products } = useProducts();
 
-  const getParam = (key) => {
-    const p = new URLSearchParams(location.search);
-    return p.get(key) || '';
-  };
-
+  const getParam = (k) => new URLSearchParams(location.search).get(k) || '';
   const [search, setSearch] = useState(getParam('search'));
   const [category, setCategory] = useState(getParam('category') || 'All');
   const [sort, setSort] = useState('default');
 
   useEffect(() => {
     const p = new URLSearchParams(location.search);
-    const s = p.get('search') || '';
-    const c = p.get('category') || 'All';
-    setSearch(s);
-    setCategory(c);
+    setSearch(p.get('search') || '');
+    setCategory(p.get('category') || 'All');
   }, [location.search]);
 
-  const getProducts = () => {
-    try {
-      const saved = localStorage.getItem('apnidukan_products');
-      if (saved) return JSON.parse(saved);
-      return ALL_PRODUCTS;
-    } catch (e) {
-      return ALL_PRODUCTS;
-    }
-  };
-
-  const PRODUCTS = getProducts();
-
-  let filtered = PRODUCTS.filter((p) => {
+  let filtered = products.filter(p => {
     const matchCat = category === 'All' || p.category === category;
     const q = search.toLowerCase();
-    const matchSearch = !search || p.name.toLowerCase().includes(q) || (p.nameHindi && p.nameHindi.includes(search));
-    return matchCat && matchSearch;
+    const matchS = !search || p.name.toLowerCase().includes(q) || (p.nameHindi && p.nameHindi.includes(search));
+    return matchCat && matchS;
   });
 
-  if (sort === 'low') filtered = [...filtered].sort((a, b) => a.price - b.price);
-  if (sort === 'high') filtered = [...filtered].sort((a, b) => b.price - a.price);
-  if (sort === 'discount') filtered = [...filtered].sort((a, b) => ((b.mrp - b.price) / b.mrp) - ((a.mrp - a.price) / a.mrp));
-  if (sort === 'name') filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
+  if (sort === 'low') filtered = [...filtered].sort((a,b) => a.price - b.price);
+  if (sort === 'high') filtered = [...filtered].sort((a,b) => b.price - a.price);
+  if (sort === 'discount') filtered = [...filtered].sort((a,b) => ((b.mrp-b.price)/b.mrp) - ((a.mrp-a.price)/a.mrp));
+  if (sort === 'name') filtered = [...filtered].sort((a,b) => a.name.localeCompare(b.name));
+  if (sort === 'stock') filtered = [...filtered].sort((a,b) => b.stock - a.stock);
 
-  const sidebarBtn = (active) => ({
-    display: 'block', width: '100%', textAlign: 'left', padding: '9px 12px', borderRadius: 10,
-    border: 'none', fontSize: 13, fontWeight: active ? 700 : 500,
-    background: active ? '#e6f4ec' : 'transparent', color: active ? '#145530' : '#4a6b50',
-    cursor: 'pointer', marginBottom: 3, fontFamily: 'Poppins, sans-serif', transition: 'all 0.2s',
-  });
+  const sbtn = (active) => ({ display:'block', width:'100%', textAlign:'left', padding:'8px 11px', borderRadius:9, border:'none', fontSize:12.5, fontWeight:active?700:500, background:active?'#e6f4ec':'transparent', color:active?'#145530':'#4a6b50', cursor:'pointer', marginBottom:2, fontFamily:'Poppins, sans-serif' });
+
+  const handleAdd = (e, p) => {
+    e.stopPropagation();
+    if (p.stock <= 0) { toast.error('Out of Stock!'); return; }
+    const r = addToCart(p);
+    if (r && !r.success) { toast.error(r.message); return; }
+    toast.success(p.name + ' added! 🛒');
+  };
 
   return (
-    <div style={{ background: '#f5f9f6', minHeight: '80vh', fontFamily: 'Poppins, sans-serif' }}>
+    <div style={{ background:'#f5f9f6', minHeight:'80vh', fontFamily:'Poppins, sans-serif' }}>
 
-      {/* Header */}
-      <div style={{ background: 'linear-gradient(135deg, #0a2e1a, #145530)', padding: '24px 28px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-          <div style={{ flex: 1 }}>
-            <h1 style={{ fontFamily: 'Baloo 2, cursive', fontSize: 26, fontWeight: 800, color: '#fff', marginBottom: 3 }}>
-              {search ? '"' + search + '" ke results' : category !== 'All' ? (CATS.find((c) => c.id === category) || {}).label || category : 'Saare Products 🛒'}
+      <div style={{ background:'linear-gradient(135deg,#0a2e1a,#145530)', padding:'22px 24px' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:14, flexWrap:'wrap' }}>
+          <div style={{ flex:1 }}>
+            <h1 style={{ fontFamily:'Baloo 2, cursive', fontSize:24, fontWeight:800, color:'#fff', marginBottom:2 }}>
+              {search ? '"'+search+'" ke results' : category !== 'All' ? (CATS.find(c=>c.id===category)||{}).label||category : 'Saare Products 🛒'}
             </h1>
-            <p style={{ color: '#86efac', fontSize: 13 }}>{filtered.length} products mile</p>
+            <p style={{ color:'#86efac', fontSize:12 }}>{filtered.length} products</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.12)', border: '1.5px solid rgba(255,255,255,0.25)', borderRadius: 50, padding: '9px 16px', gap: 8 }}>
-            <span style={{ color: '#86efac', fontSize: 15 }}>🔍</span>
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search English ya Hindi mein..."
-              style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: 13, color: '#fff', fontFamily: 'Poppins, sans-serif', width: 200 }}
-            />
-            {search && (
-              <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontSize: 14 }}>✕</button>
-            )}
+          <div style={{ display:'flex', alignItems:'center', background:'rgba(255,255,255,0.12)', border:'1.5px solid rgba(255,255,255,0.25)', borderRadius:50, padding:'8px 16px', gap:8 }}>
+            <span style={{ color:'#86efac' }}>🔍</span>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search English ya Hindi..."
+              style={{ border:'none', outline:'none', background:'transparent', fontSize:13, color:'#fff', fontFamily:'Poppins, sans-serif', width:180 }} />
+            {search && <button onClick={()=>setSearch('')} style={{ background:'none',border:'none',color:'rgba(255,255,255,0.7)',cursor:'pointer',fontSize:13 }}>✕</button>}
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '190px 1fr', minHeight: '80vh' }}>
+      <div style={{ display:'grid', gridTemplateColumns:'180px 1fr', minHeight:'80vh' }}>
 
         {/* Sidebar */}
-        <div style={{ background: '#fff', borderRight: '1.5px solid #e8f2ea', padding: '18px 14px' }}>
-          <h3 style={{ fontFamily: 'Baloo 2, cursive', fontSize: 16, fontWeight: 800, color: '#0a2e1a', marginBottom: 12 }}>Categories</h3>
-          {CATS.map((c) => (
-            <button key={c.id} onClick={() => setCategory(c.id)} style={sidebarBtn(category === c.id)}>
-              {category === c.id ? '✓ ' : ''}{c.label}
-            </button>
-          ))}
-          <div style={{ borderTop: '1.5px solid #e8f2ea', marginTop: 14, paddingTop: 14 }}>
-            <h3 style={{ fontFamily: 'Baloo 2, cursive', fontSize: 16, fontWeight: 800, color: '#0a2e1a', marginBottom: 10 }}>Sort By</h3>
-            {[['default', 'Default'], ['low', 'Price: Low → High'], ['high', 'Price: High → Low'], ['discount', 'Max Discount'], ['name', 'Name A-Z']].map(([v, l]) => (
-              <button key={v} onClick={() => setSort(v)} style={sidebarBtn(sort === v)}>
-                {sort === v ? '✓ ' : ''}{l}
-              </button>
+        <div style={{ background:'#fff', borderRight:'1.5px solid #e8f2ea', padding:'16px 12px' }}>
+          <h3 style={{ fontFamily:'Baloo 2, cursive', fontSize:15, fontWeight:800, color:'#0a2e1a', marginBottom:10 }}>Categories</h3>
+          {CATS.map(c => <button key={c.id} onClick={()=>setCategory(c.id)} style={sbtn(category===c.id)}>{category===c.id?'✓ ':''}{c.label}</button>)}
+          <div style={{ borderTop:'1.5px solid #e8f2ea', marginTop:12, paddingTop:12 }}>
+            <h3 style={{ fontFamily:'Baloo 2, cursive', fontSize:15, fontWeight:800, color:'#0a2e1a', marginBottom:8 }}>Sort By</h3>
+            {[['default','Default'],['low','Price: Low→High'],['high','Price: High→Low'],['discount','Max Discount'],['stock','In Stock First'],['name','Name A-Z']].map(([v,l]) => (
+              <button key={v} onClick={()=>setSort(v)} style={sbtn(sort===v)}>{sort===v?'✓ ':''}{l}</button>
             ))}
           </div>
         </div>
 
         {/* Grid */}
-        <div style={{ padding: '18px 22px' }}>
+        <div style={{ padding:'16px 18px' }}>
           {filtered.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '70px 20px' }}>
-              <div style={{ fontSize: 56, marginBottom: 14 }}>🔍</div>
-              <p style={{ fontFamily: 'Baloo 2, cursive', fontSize: 20, fontWeight: 800, color: '#0a2e1a', marginBottom: 10 }}>"{search}" nahi mila!</p>
-              <p style={{ color: '#6b8f71', marginBottom: 18 }}>English ya Hindi mein try karo</p>
-              <button onClick={() => { setSearch(''); setCategory('All'); }} style={{ background: '#145530', color: '#fff', border: 'none', borderRadius: 50, padding: '12px 26px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
-                Clear Filters
-              </button>
+            <div style={{ textAlign:'center', padding:'60px 20px' }}>
+              <div style={{ fontSize:52, marginBottom:12 }}>🔍</div>
+              <p style={{ fontFamily:'Baloo 2, cursive', fontSize:20, fontWeight:800, color:'#0a2e1a', marginBottom:10 }}>Nahi mila "{search}"!</p>
+              <button onClick={()=>{setSearch('');setCategory('All');}} style={{ background:'#145530',color:'#fff',border:'none',borderRadius:50,padding:'11px 24px',fontSize:13,fontWeight:700,cursor:'pointer' }}>Clear Filters</button>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
-              {filtered.map((p) => {
-                const disc = p.mrp > p.price ? Math.round(((p.mrp - p.price) / p.mrp) * 100) : 0;
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:13 }}>
+              {filtered.map(p => {
+                const disc = p.mrp > p.price ? Math.round(((p.mrp-p.price)/p.mrp)*100) : 0;
+                const inStock = p.stock > 0;
                 return (
-                  <div
-                    key={p._id}
-                    style={{ background: '#fff', borderRadius: 16, overflow: 'hidden', border: '1.5px solid #e8f2ea', cursor: 'pointer', transition: 'all 0.2s' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 14px 30px rgba(20,85,48,0.12)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-                    onClick={() => { addToCart(p); toast.success(p.name + ' added! 🛒'); }}
-                  >
-                    <div style={{ height: 135, overflow: 'hidden', position: 'relative' }}>
-                      <img src={p.img} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
-                      <span style={{ position: 'absolute', top: 8, left: 8, background: '#145530', color: '#fff', fontSize: 9, fontWeight: 700, padding: '3px 9px', borderRadius: 50 }}>{p.badge}</span>
-                      {disc >= 10 && <span style={{ position: 'absolute', top: 8, right: 8, background: '#e24b4a', color: '#fff', fontSize: 9, fontWeight: 800, padding: '3px 7px', borderRadius: 50 }}>{disc}% OFF</span>}
+                  <div key={p._id} onClick={()=>navigate('/product/'+p._id)}
+                    style={{ background:'#fff', borderRadius:16, overflow:'hidden', border:'1.5px solid ' + (inStock?'#e8f2ea':'#fca5a5'), cursor:'pointer', transition:'all 0.2s', opacity:inStock?1:0.8 }}
+                    onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.boxShadow='0 12px 26px rgba(20,85,48,0.12)';}}
+                    onMouseLeave={e=>{e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.boxShadow='none';}}>
+                    <div style={{ height:130, overflow:'hidden', position:'relative' }}>
+                      <img src={p.img} alt={p.name} style={{ width:'100%', height:'100%', objectFit:'cover', filter:inStock?'none':'grayscale(30%)' }} loading="lazy" />
+                      <span style={{ position:'absolute', top:7, left:7, background:'#145530', color:'#fff', fontSize:9, fontWeight:700, padding:'2px 8px', borderRadius:50 }}>{p.badge}</span>
+                      {disc>=10 && <span style={{ position:'absolute', top:7, right:7, background:'#e24b4a', color:'#fff', fontSize:9, fontWeight:800, padding:'2px 7px', borderRadius:50 }}>{disc}% OFF</span>}
+                      {!inStock && <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.45)', display:'flex', alignItems:'center', justifyContent:'center' }}><span style={{ background:'#e24b4a', color:'#fff', fontSize:11, fontWeight:800, padding:'5px 14px', borderRadius:50 }}>Out of Stock</span></div>}
                     </div>
-                    <div style={{ padding: 12 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#0a2e1a', marginBottom: 1 }}>{p.name}</div>
-                      {p.nameHindi && <div style={{ fontSize: 10, color: '#6b8f71', marginBottom: 1 }}>{p.nameHindi}</div>}
-                      <div style={{ fontSize: 11, color: '#6b8f71', marginBottom: 9 }}>{p.quantity}</div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ padding:11 }}>
+                      <div style={{ fontSize:12.5, fontWeight:700, color:'#0a2e1a', marginBottom:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{p.name}</div>
+                      {p.nameHindi && <div style={{ fontSize:10, color:'#6b8f71', marginBottom:1 }}>{p.nameHindi}</div>}
+                      <div style={{ fontSize:10, color:'#6b8f71', marginBottom:8 }}>{p.quantity}</div>
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                         <div>
-                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                            <span style={{ fontFamily: 'Baloo 2, cursive', fontSize: 17, fontWeight: 800, color: '#145530' }}>Rs.{p.price}</span>
-                            {p.mrp > p.price && <span style={{ fontSize: 11, color: '#9ca3af', textDecoration: 'line-through' }}>Rs.{p.mrp}</span>}
+                          <div style={{ display:'flex', alignItems:'baseline', gap:3 }}>
+                            <span style={{ fontFamily:'Baloo 2, cursive', fontSize:16, fontWeight:800, color:'#145530' }}>Rs.{p.price}</span>
+                            {p.mrp>p.price && <span style={{ fontSize:10, color:'#9ca3af', textDecoration:'line-through' }}>Rs.{p.mrp}</span>}
                           </div>
-                          {disc > 0 && <div style={{ fontSize: 9, color: '#22c55e', fontWeight: 700 }}>Rs.{p.mrp - p.price} bachat!</div>}
+                          {disc>0 && <div style={{ fontSize:9, color:'#22c55e', fontWeight:700 }}>Rs.{p.mrp-p.price} bachat!</div>}
                         </div>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); addToCart(p); toast.success(p.name + ' added! 🛒'); }}
-                          style={{ background: '#e6f4ec', color: '#145530', border: '1.5px solid #b8dfc6', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, cursor: 'pointer', fontWeight: 800 }}
-                        >+</button>
+                        <button onClick={e=>handleAdd(e,p)}
+                          style={{ background:inStock?'#e6f4ec':'#f5f5f5', color:inStock?'#145530':'#9ca3af', border:'1.5px solid '+(inStock?'#b8dfc6':'#ddd'), borderRadius:'50%', width:30, height:30, display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, cursor:inStock?'pointer':'not-allowed', fontWeight:800 }}>+</button>
                       </div>
                     </div>
                   </div>
@@ -225,8 +135,8 @@ export default function Products() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Poppins:wght@400;500;600;700&display=swap');
         @media (max-width:768px) {
-          div[style*="grid-template-columns: 190px"] { grid-template-columns:1fr !important; }
-          div[style*="grid-template-columns: repeat(4"] { grid-template-columns:repeat(2,1fr) !important; }
+          div[style*="grid-template-columns: 180px 1fr"] { grid-template-columns:1fr !important; }
+          div[style*="grid-template-columns: repeat(4,1fr)"] { grid-template-columns:repeat(2,1fr) !important; }
         }
       `}</style>
     </div>
